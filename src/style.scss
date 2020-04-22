@@ -1,13 +1,33 @@
-body, html {
+// $fontcolor:  rgb(100, 100, 100);
+$backgroundcolor: rgb(90%, 90%, 90%);
+
+
+body {
   font-family: "Roboto", sans-serif;
-  background: linear-gradient(to bottom, #87e0fd 0%,#53cbf1 40%,#05abe0 100%);
-  height: 100%;
+  // color: $fontcolor;
+  background-color: $backgroundcolor;
+  margin: 50px;
 }
 
-.logo {
-  background-image: url('img/doggo.jpg');
-  width: 100px;
-  height: 100px;
-  background-repeat: no-repeat;
-  background-size: contain;
+.note {
+  box-shadow: 2px 2px 4px 0px rgb(100, 100, 100);
+  background-color: white;
+  width: 200px;
+  height: 200px;
+}
+
+.note-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.drag-icon, .cursor {
+  cursor: move;
 }
