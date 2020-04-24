@@ -45,6 +45,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
     "@fortawesome/react-fontawesome": "^0.1.9",
     "axios": "^0.19.2",
+    "firebase": "^7.14.1",
     "immutable": "^4.0.0-rc.12",
     "jquery": "^3.5.0",
     "lodash.debounce": "^4.0.8",

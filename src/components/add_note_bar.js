@@ -1,5 +1,6 @@
 /* eslint-disable react/button-has-type */
 import React from 'react';
+import * as db from '../services/datastore';
 
 class AddNoteBar extends React.Component {
   constructor(props) {
@@ -15,7 +16,7 @@ class AddNoteBar extends React.Component {
   }
 
   onButtonClick = () => {
-    this.props.onSubmit(this.state.title);
+    db.addNote(this.state.title, this.props.onSubmit);
     this.setState({ title: '' });
   }
 

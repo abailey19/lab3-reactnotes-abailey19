@@ -10,15 +10,14 @@ import {
 import marked from 'marked';
 import TextareaAutosize from 'react-textarea-autosize';
 
-// import NoteHeader from './note_header';
-// import NoteBody from './note_body';
+import * as db from '../services/datastore';
 
 class Note extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      id: props.note.id,
+      id: props.id,
       title: props.note.title,
       content: props.note.text,
       x_pos: props.note.x,
@@ -31,16 +30,18 @@ class Note extends React.Component {
 
   handleDrag = (e, data) => {
     this.setState({ x_pos: data.x, y_pos: data.y });
+    db.updateNote(this.state.id, { x: data.x, y: data.y }, this.props.updateNote);
   }
 
   onEdit = () => {
     this.setState((prevState) => ({
       isEditing: !prevState.isEditing,
     }));
+    db.updateNote(this.state.id, { text: this.state.content }, this.props.updateNote);
   }
 
   onDelete = () => {
-    this.props.onDelete(this.state.id);
+    db.deleteNote(this.state.id, this.props.onDelete);
   }
 
   renderEditButton = () => {
@@ -61,7 +62,7 @@ class Note extends React.Component {
 
   onInputChange = (event) => {
     this.setState({ content: event.target.value });
-    this.props.updateNote(this.state.id, { text: this.state.content });
+    db.updateNote(this.state.id, { text: this.state.content }, this.props.updateNote);
   }
 
   renderBody() {
@@ -70,7 +71,7 @@ class Note extends React.Component {
         // TextareaAutosize code taken from https://andreypopp.com/react-textarea-autosize/
         <TextareaAutosize
           useCacheForDOMMeasurements
-          value={this.state.conent}
+          value={this.state.content}
           onChange={this.onInputChange}
         />
       );
@@ -91,7 +92,6 @@ class Note extends React.Component {
         onDrag={this.handleDrag}
       >
         <div className="note">
-          {/* <NoteHeader className="header" title={this.props.note.title} /> */}
           <div className="note-header">
             <div className="header-left">
               <div className="note-title">
@@ -104,7 +104,6 @@ class Note extends React.Component {
             </div>
             <FontAwesomeIcon className="drag-icon" icon={faArrowsAlt} />
           </div>
-          {/* <NoteBody content={this.props.note.text} /> */}
           {this.renderBody()}
         </div>
       </Draggable>
