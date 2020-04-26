@@ -15,34 +15,32 @@ firebase.initializeApp(firebaseConfig);
 
 const database = firebase.database();
 
-export function fetchNotes(fetchCallback) {
-  firebase.database().ref('notes').on('value', (snapshot) => {
-    console.log(snapshot.val());
+export function fetchNotes(userID, fetchCallback) {
+  firebase.database().ref(`notes/${userID}`).on('value', (snapshot) => {
     const newNoteState = snapshot.val();
     fetchCallback(newNoteState);
   });
 }
 
-export function addNote(title, addCallback) {
+export function addNote(userID, title, zIndex, addCallback) {
   const newNote = {
     title,
     text: '',
     x: 0,
     y: 20,
-    zIndex: 0,
+    zIndex,
   };
-  const newPostKey = database.ref().child('notes').push().key;
-  console.log(newPostKey);
-  firebase.database().ref('notes').child(newPostKey).update(newNote);
+  const newPostKey = database.ref().child(`notes/${userID}`).push().key;
+  firebase.database().ref(`notes/${userID}`).child(newPostKey).update(newNote);
   addCallback(newPostKey, newNote);
 }
 
-export function updateNote(id, fields, updateCallback) {
-  firebase.database().ref('notes').child(id).update(fields);
+export function updateNote(userID, id, fields, updateCallback) {
+  firebase.database().ref(`notes/${userID}`).child(id).update(fields);
   updateCallback(id, fields);
 }
 
-export function deleteNote(id, deleteCallback) {
-  firebase.database().ref('notes').child(id).remove();
+export function deleteNote(userID, id, deleteCallback) {
+  firebase.database().ref(`notes/${userID}`).child(id).remove();
   deleteCallback(id);
 }

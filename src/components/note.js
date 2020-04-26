@@ -3,10 +3,11 @@
 /* eslint-disable react/button-has-type */
 import React from 'react';
 import Draggable from 'react-draggable';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faArrowsAlt, faTrashAlt, faPen, faCheck,
-} from '@fortawesome/free-solid-svg-icons';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CreateIcon from '@material-ui/icons/Create';
+import DoneIcon from '@material-ui/icons/Done';
+import OpenWithIcon from '@material-ui/icons/OpenWith';
 import marked from 'marked';
 import TextareaAutosize from 'react-textarea-autosize';
 
@@ -20,49 +21,72 @@ class Note extends React.Component {
       id: props.id,
       title: props.note.title,
       content: props.note.text,
-      x_pos: props.note.x,
-      y_pos: props.note.y,
-      // note_width: 20,
-      // note_height: 20,
       isEditing: false,
     };
   }
 
-  handleDrag = (e, data) => {
-    this.setState({ x_pos: data.x, y_pos: data.y });
-    db.updateNote(this.state.id, { x: data.x, y: data.y }, this.props.updateNote);
+  handleStartDrag = (e, data) => {
+    db.updateNote(this.props.userID, this.state.id, { zIndex: this.props.maxZIndex + 1 }, this.props.updateNote);
   }
 
-  onEdit = () => {
+  handleDrag = (e, data) => {
+    db.updateNote(this.props.userID, this.state.id, { x: data.x, y: data.y }, this.props.updateNote);
+  }
+
+  onEditClick = () => {
     this.setState((prevState) => ({
       isEditing: !prevState.isEditing,
     }));
-    db.updateNote(this.state.id, { text: this.state.content }, this.props.updateNote);
+    db.updateNote(this.props.userID, this.state.id, { text: this.state.content, title: this.state.title, zIndex: this.props.maxZIndex + 1 }, this.props.updateNote);
+  }
+
+  onTitleChange = (event) => {
+    this.setState({ title: event.target.value });
+    db.updateNote(this.props.userID, this.state.id, { title: this.state.title }, this.props.updateNote);
+  }
+
+  onBodyChange = (event) => {
+    this.setState({ content: event.target.value });
+    db.updateNote(this.props.userID, this.state.id, { text: this.state.content }, this.props.updateNote);
   }
 
   onDelete = () => {
-    db.deleteNote(this.state.id, this.props.onDelete);
+    db.deleteNote(this.props.userID, this.state.id, this.props.onDelete);
   }
 
   renderEditButton = () => {
     if (this.state.isEditing) {
       return (
-        <button onClick={this.onEdit}>
-          <FontAwesomeIcon className="icon-button" icon={faCheck} />
-        </button>
+        <IconButton style={{ width: '3px', height: '3px' }} aria-label="done" onClick={this.onEditClick}>
+          <DoneIcon style={{ color: 'black', fontSize: '20px', marginTop: '-10px' }} />
+        </IconButton>
       );
     } else {
       return (
-        <button onClick={this.onEdit}>
-          <FontAwesomeIcon className="icon-button" icon={faPen} />
-        </button>
+        <IconButton style={{ width: '3px', height: '3px' }} aria-label="create" onClick={this.onEditClick}>
+          <CreateIcon style={{
+            color: 'black', fontSize: '20px', marginTop: '-12px', marginLeft: '5px', marginRight: '15px',
+          }}
+          />
+        </IconButton>
       );
     }
   }
 
-  onInputChange = (event) => {
-    this.setState({ content: event.target.value });
-    db.updateNote(this.state.id, { text: this.state.content }, this.props.updateNote);
+  renderTitle() {
+    if (this.state.isEditing) {
+      return (
+        <div className="note-title">
+          <input value={this.state.title} onChange={this.onTitleChange} />
+        </div>
+      );
+    } else {
+      return (
+        <div className="note-title" style={{ marginTop: '-15px' }}>
+          <div dangerouslySetInnerHTML={{ __html: marked(this.props.note.title || '') }} />
+        </div>
+      );
+    }
   }
 
   renderBody() {
@@ -70,13 +94,14 @@ class Note extends React.Component {
       return (
         // TextareaAutosize code taken from https://andreypopp.com/react-textarea-autosize/
         <TextareaAutosize
+          className="note-body"
           useCacheForDOMMeasurements
           value={this.state.content}
-          onChange={this.onInputChange}
+          onChange={this.onBodyChange}
         />
       );
     } else {
-      return <div className="noteBody" dangerouslySetInnerHTML={{ __html: marked(this.state.content || '') }} />;
+      return <div className="note-body" dangerouslySetInnerHTML={{ __html: marked(this.props.note.text || '') }} />;
     }
   }
 
@@ -85,24 +110,35 @@ class Note extends React.Component {
       <Draggable
         handle=".drag-icon"
         grid={[25, 25]}
-        defaultPosition={{ x: 20, y: 20 }}
+        defaultPosition={{ x: 0, y: 20 }}
         position={{
-          x: this.state.x_pos, y: this.state.y_pos, // width: this.state.note_width, height: this.state.note_height,
+          x: this.props.note.x,
+          y: this.props.note.y,
         }}
+        onStart={this.handleStartDrag}
         onDrag={this.handleDrag}
       >
-        <div className="note">
+        <div className="note"
+          style={{
+            width: this.props.note.text === '' ? '200px' : 'fit-content',
+            height: this.props.note.text === '' ? '200px' : 'fit-content',
+            zIndex: this.props.note.zIndex,
+          }}
+        >
           <div className="note-header">
             <div className="header-left">
-              <div className="note-title">
-                {this.state.title}
-              </div>
-              <button onClick={this.onDelete}>
-                <FontAwesomeIcon className="icon-button" icon={faTrashAlt} />
-              </button>
+              {this.renderTitle()}
+              <IconButton style={{ width: '3px', height: '3px' }} aria-label="create" onClick={this.onDelete}>
+                <DeleteIcon style={{
+                  color: 'black', fontSize: '20px', marginTop: '-12px', marginLeft: '3px',
+                }}
+                />
+              </IconButton>
               {this.renderEditButton()}
             </div>
-            <FontAwesomeIcon className="drag-icon" icon={faArrowsAlt} />
+            <OpenWithIcon className="drag-icon"
+              style={{ color: 'black', fontSize: '20px', marginLeft: '5px' }}
+            />
           </div>
           {this.renderBody()}
         </div>
