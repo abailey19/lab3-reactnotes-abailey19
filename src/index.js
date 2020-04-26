@@ -36,12 +36,6 @@ class App extends React.Component {
         this.setState({ loggedIn: false });
       }
     });
-    // this.authUser().then((user) => {
-    //   this.setState({ loggedIn: true, userID: user.uid });
-    //   // db.fetchNotes(user.uid, this.getNotes);
-    // }).catch((error) => {
-    //   console.log(error);
-    // });
   }
 
   // authUser code adapted from https://stackoverflow.com/questions/47376453/reactjs-how-to-wait-for-componentdidmount-to-finish-before-rendering
